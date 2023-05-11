@@ -34,6 +34,7 @@ const animals = {
 };
 
 function getAllAnimals(req, res) {
+  res.set("Access-Control-Allow-Origin", "*");
   res.send(animals);
 }
 

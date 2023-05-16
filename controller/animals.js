@@ -18,7 +18,7 @@ const pool = require("./db");
 async function getAllAnimals(req, res) {
   try {
     const db_res = await pool.query("SELECT * FROM animals");
-    res.status(200).json(data.rows);
+    res.status(200).json(db_res.rows);
   } catch (err) {
     console.log(err);
     res.status(500).send("Oops, something went wrong. :(");
@@ -26,14 +26,14 @@ async function getAllAnimals(req, res) {
 }
 
 async function getAnimalById(req, res) {
-  const { id } = req.params;
+  const { animalId } = req.params;
   try {
     const { rows: animals } = await pool.query(
-      "SELECT * FROM animals WHERE id=$1",
-      [id]
+      "SELECT * FROM animals WHERE animalId=$1",
+      [animalId]
     );
     if (animals.length) res.status(200).json(animals[0]);
-    else res.status(404).send(`No animal with id ${id} found.`);
+    else res.status(404).send(`No animal with id ${animalId} found.`);
   } catch (err) {
     console.log(err);
     res.status(500).send("Oops, something went wrong. :(");
@@ -64,10 +64,11 @@ async function createAnimal(req, res) {
 }
 
 async function updateAnimal(req, res) {
-  const { id } = req.params;
+  const { animalId } = req.params;
+  console.log(req.body);
   const {
     category,
-    animalImageUrl,
+    animalimageurl,
     name,
     gender,
     age,
@@ -77,17 +78,17 @@ async function updateAnimal(req, res) {
   } = req.body;
   try {
     const { rows: updatedAnimal } = await pool.query(
-      "UPDATE animals SET category=$1, animalImageUrl=$2, name=$3, gender=$4, age=$5, breed=$6, tags=$7, description=$8 WHERE id=$9",
+      "UPDATE animals SET category=$1, animalImageUrl=$2, name=$3, gender=$4, age=$5, breed=$6, tags=$7, description=$8 WHERE animalId=$9",
       [
         category,
-        animalImageUrl,
+        animalimageurl,
         name,
         gender,
         age,
         breed,
         tags,
         description,
-        id,
+        animalId,
       ]
     );
     res.status(200).send(`${category} ${name} has been updated.`);
@@ -98,16 +99,16 @@ async function updateAnimal(req, res) {
 }
 
 async function deleteAnimal(req, res) {
-  const { id } = req.params;
+  const { animalId } = req.params;
   try {
     const { rows: deletedAnimal } = await pool.query(
-      "DELETE FROM animals WHERE id=$1 RETURNING *",
-      [id]
+      "DELETE FROM animals WHERE animalId=$1 RETURNING *",
+      [animalId]
     );
     res
       .status(200)
       .send(
-        `${deletedAnimal.category} ${deletedAnimal.name} with the id ${id} has been deleted.`
+        `${deletedAnimal.category} ${deletedAnimal.name} with the id ${animalId} has been deleted.`
       );
   } catch (err) {
     console.log(err);

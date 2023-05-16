@@ -8,9 +8,10 @@ const {
   deleteAnimal,
 } = require("../controller/animals.js");
 
-animalsRouter.get("/animals", getAllAnimals).post(createAnimal);
+animalsRouter.route("/animals").get(getAllAnimals).post(createAnimal);
 animalsRouter
-  .get("/animals/:animalID", getAnimalById)
+  .route("/animals/:animalId")
+  .get(getAnimalById)
   .put(updateAnimal)
   .delete(deleteAnimal);
 

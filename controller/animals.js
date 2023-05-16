@@ -1,28 +1,124 @@
-const animals = [
-  {
-    animalId: 104,
-    category: "Dog",
-    animalImageUrl:
-      "//images.ctfassets.net/3buz4oreveso/2UeTeUce0ZCGlTAbPQPZ1g/381447e04fa04bbe38abc00b07e3b5f2/Azul.jpg",
-    name: "Buddy",
-    gender: "male",
-    age: "0.5",
-    breed: "Golden Retriever",
-    tags: ["friendly", "affectionate"],
-    description: "Meet Buddy",
-  },
-];
+const pool = require("./db");
 
-function getAllAnimals(req, res) {
-  res.set("Access-Control-Allow-Origin", "*");
-  res.send(animals);
+// const animals = [
+//   {
+//     animalId: 104,
+//     category: "Dog",
+//     animalImageUrl:
+//       "//images.ctfassets.net/3buz4oreveso/2UeTeUce0ZCGlTAbPQPZ1g/381447e04fa04bbe38abc00b07e3b5f2/Azul.jpg",
+//     name: "Buddy",
+//     gender: "male",
+//     age: "0.5",
+//     breed: "Golden Retriever",
+//     tags: ["friendly", "affectionate"],
+//     description: "Meet Buddy",
+//   },
+// ];
+
+async function getAllAnimals(req, res) {
+  try {
+    const db_res = await pool.query("SELECT * FROM animals");
+    res.status(200).json(data.rows);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Oops, something went wrong. :(");
+  }
 }
 
-function getAnimalById(req, res) {
-  let singleAnimal = animals.items.find(
-    (item) => item.fields.animalId == req.params.id
-  );
-  res.send(singleAnimal);
+async function getAnimalById(req, res) {
+  const { id } = req.params;
+  try {
+    const { rows: animals } = await pool.query(
+      "SELECT * FROM animals WHERE id=$1",
+      [id]
+    );
+    if (animals.length) res.status(200).json(animals[0]);
+    else res.status(404).send(`No animal with id ${id} found.`);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Oops, something went wrong. :(");
+  }
 }
 
-module.exports = { getAllAnimals, getAnimalById };
+async function createAnimal(req, res) {
+  try {
+    const {
+      category,
+      animalImageUrl,
+      name,
+      gender,
+      age,
+      breed,
+      tags,
+      description,
+    } = req.body;
+    const { rows: createdAnimal } = await pool.query(
+      "INSERT INTO animals (category, animalImageUrl, name, gender, age, breed, tags, description) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
+      [category, animalImageUrl, name, gender, age, breed, tags, description]
+    );
+    res.status(201).send(`${category}${name} has been created`);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Oops, something went wrong. :(");
+  }
+}
+
+async function updateAnimal(req, res) {
+  const { id } = req.params;
+  const {
+    category,
+    animalImageUrl,
+    name,
+    gender,
+    age,
+    breed,
+    tags,
+    description,
+  } = req.body;
+  try {
+    const { rows: updatedAnimal } = await pool.query(
+      "UPDATE animals SET category=$1, animalImageUrl=$2, name=$3, gender=$4, age=$5, breed=$6, tags=$7, description=$8 WHERE id=$9",
+      [
+        category,
+        animalImageUrl,
+        name,
+        gender,
+        age,
+        breed,
+        tags,
+        description,
+        id,
+      ]
+    );
+    res.status(200).send(`${category} ${name} has been updated.`);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Oops, something went wrong. :(");
+  }
+}
+
+async function deleteAnimal(req, res) {
+  const { id } = req.params;
+  try {
+    const { rows: deletedAnimal } = await pool.query(
+      "DELETE FROM animals WHERE id=$1 RETURNING *",
+      [id]
+    );
+    res
+      .status(200)
+      .send(
+        `${deletedAnimal.category} ${deletedAnimal.name} with the id ${id} has been deleted.`
+      );
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Oops, something went wrong. :(");
+  }
+}
+
+module.exports = {
+  getAllAnimals,
+  getAnimalById,
+  createAnimal,
+  updateAnimal,
+  deleteAnimal,
+};

@@ -65,7 +65,6 @@ async function createAnimal(req, res) {
 
 async function updateAnimal(req, res) {
   const { animalId } = req.params;
-  console.log(req.body);
   const {
     category,
     animalimageurl,

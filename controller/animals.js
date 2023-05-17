@@ -44,7 +44,7 @@ async function createAnimal(req, res) {
   try {
     const {
       category,
-      animalImageUrl,
+      animalimageurl,
       name,
       gender,
       age,
@@ -53,10 +53,10 @@ async function createAnimal(req, res) {
       description,
     } = req.body;
     const { rows: createdAnimal } = await pool.query(
-      "INSERT INTO animals (category, animalImageUrl, name, gender, age, breed, tags, description) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
-      [category, animalImageUrl, name, gender, age, breed, tags, description]
+      "INSERT INTO animals (category, animalimageurl, name, gender, age, breed, tags, description) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
+      [category, animalimageurl, name, gender, age, breed, tags, description]
     );
-    res.status(201).send(`${category}${name} has been created`);
+    res.status(201).send(`${category} ${name} has been created`);
   } catch (err) {
     console.log(err);
     res.status(500).send("Oops, something went wrong. :(");
@@ -101,13 +101,13 @@ async function deleteAnimal(req, res) {
   const { animalId } = req.params;
   try {
     const { rows: deletedAnimal } = await pool.query(
-      "DELETE FROM animals WHERE animalId=$1 RETURNING *",
+      "DELETE FROM animals WHERE animalid=$1 RETURNING *",
       [animalId]
     );
     res
       .status(200)
       .send(
-        `${deletedAnimal.category} ${deletedAnimal.name} with the id ${animalId} has been deleted.`
+        `${deletedAnimal[0].category} ${deletedAnimal[0].name} with the id ${animalId} has been deleted.`
       );
   } catch (err) {
     console.log(err);
